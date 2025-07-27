@@ -1,0 +1,61 @@
+#/.build
+#/Packages
+.build/
+xcuserdata/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+*.temp
+playground.xcworkspace
+
+# Xcode
+.DS_Store
+*/xcuserdata
+*.xcuserstate
+*.xcuserdatad
+*.xccheckout
+*.xcscmblueprint
+*.xcscheme
+*.xcworkspace
+!default.xcworkspace
+
+# Build
+build/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Swift Package Manager
+.swiftpm
+Packages/
+.checkouts/
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# AppCode
+.idea/
+
+# SwiftLint
+.swiftlint.yml
+
+# Local development overrides
+.env
+.env.local
+
+# Misc
+*.log
+*.backup
+*.swp
+*~.nib
+
+# macOS
+*.DS_Store
