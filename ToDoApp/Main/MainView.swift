@@ -9,14 +9,12 @@ import SwiftUI
 import CoreData
 
 struct MainView: View {
-    //    private let networkService: NetworkServiceProtocol
-    //    @State internal var initialData: NetworkTodosModel
-    //    @State internal var initialData: [ToDoModel] = []
-    //    @State internal var firstEntry = true
-
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: MainViewModel //<PersistenceController>
     @State private var searchQuery = ""
+//    @State private var selectedItem: ToDoItem?
+    @State private var selectedItem: ToDoEntity?
+    @State private var editItem: Bool = false
 
     init() {
         let context = PersistenceController.shared.container.viewContext
@@ -24,84 +22,167 @@ struct MainView: View {
     }
 
     var body: some View {
-        VStack {
-            Text("Задачи")
-                .font(.system(size: 34, weight: .bold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-            SearchBarView(text: $searchQuery)
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 16)
         NavigationView {
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack {
-                    //                    ForEach(viewModel.items) { item in
-                    ForEach(viewModel.listData.todos) { item in
-                        NavigationLink(destination: {
-                            //                            Text("Item at \(item.timestamp!, formatter: viewModel.itemFormatter)")
-                            Text("Item: \(item.todo)")
-                        }) {
-                            MainCellView(toDoItem: item)
+            VStack {
+                Text("Задачи")
+                    .font(.system(size: 34, weight: .bold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                SearchBarView(text: $searchQuery)
+                    .padding(.bottom, 16)
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVStack {
+//                        ForEach(Array(viewModel.listData.todos.enumerated()), id: \.element.id) { index, item in
+                        ForEach(viewModel.items, id: \.id) { item in
+                            Button {
+                                viewModel.toggleItem(item: item)
+                            } label: {
+//                                MainCellView(toDoItem: $viewModel.listData.todos[index])
+                                MainCellView(toDoEntity: item)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(PlainButtonStyle())
+                            .contentShape(Rectangle())
+                            .contextMenu {
+                                Button {
+                                    editItem = true
+                                    selectedItem = item
+//                                    print("in edit, editItem = \(editItem)")
+                                } label: {
+                                    Label("Редактировать", systemImage: "square.and.pencil")
+                                }
+                            }
+                            Divider()
                         }
-                        .frame(maxWidth: .infinity)
-                        .buttonStyle(PlainButtonStyle())
-                        .contentShape(Rectangle())
-                        .background(Color.white)
-                        Divider()
                     }
+                    NavigationLink(
+//                        destination: ToDoActionView(toDoItem: $selectedItem),
+                        destination: ToDoActionView(toDoEntity: $selectedItem),
+                        isActive: $editItem,
+                        label: { EmptyView() }
+                    )
+                    .hidden()
                 }
+//                .task {
+//                    await viewModel.loadTableData()
+//                }
             }
-//            .navigationTitle("Задачи")
-//            .navigationBarBackButtonHidden(true)
+            .padding(.horizontal, 20)
+            .edgesIgnoringSafeArea(.bottom)
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text("Добавить операцию")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(Color(.appWhite))
-            }
-        }
-        .padding(.horizontal, 20)
-        .task {
-            await viewModel.loadTableData()
-        }
-        .overlay {
-            if viewModel.isLoading {
-                ProgressView()
-            }
-        }
-        ZStack {
-            Text("\(viewModel.listData.total) задач")
-                .font(.system(size: 11, weight: .regular))
-                .foregroundColor(.appWhite)
-                .frame(height: 13)
-                .padding(.vertical, 20.5)
-//                .padding(.bottom, 15.5)
-            HStack {
-                Spacer()
-                Button(action: {
-                    viewModel.addItem()
-                }) {
-                    Image(systemName: "square.and.pencil")
-                        .frame(height: 28)
-                        .foregroundStyle(.appYellow)
-                        .font(.system(size: 22, weight: .regular))
-                        .padding(.trailing, 22)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: 50) //, alignment: .trailing)
-        .background(.appGray)
-//        .opacity(0.5)
-//        .blur(radius: 50, opaque: false)
     }
 }
+
 
 #Preview {
     MainView()
 }
 
+//struct MainViewWorking: View {
+//    @Environment(\.managedObjectContext) private var viewContext
+//    @StateObject private var viewModel: MainViewModel //<PersistenceController>
+//    @State private var searchQuery = ""
+//    @State private var selectedItem: ToDoItem?
+//    @State private var editItem: Bool = false
+//
+//    init() {
+//        let context = PersistenceController.shared.container.viewContext
+//        _viewModel = StateObject(wrappedValue: MainViewModel(context: context))
+//    }
+//
+//    var body: some View {
+//        VStack {
+//            Text("Задачи")
+//                .font(.system(size: 34, weight: .bold))
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//            SearchBarView(text: $searchQuery)
+//        }
+//        .padding(.horizontal, 20)
+//        .padding(.bottom, 16)
+//        NavigationView {
+//            ScrollView(.vertical, showsIndicators: false) {
+//                LazyVStack {
+//                    ForEach(Array(viewModel.listData.todos.enumerated()), id: \.element.id) { index, item in
+//                            Button {
+//                                viewModel.toggleItem(item: item)
+//                            } label: {
+//                                //                            MainCellView(toDoItem: item)
+//                                MainCellView(toDoItem: $viewModel.listData.todos[index])
+//                            }
+//                            .frame(maxWidth: .infinity)
+//                            .buttonStyle(PlainButtonStyle())
+//                            .contentShape(Rectangle())
+//                            .background(Color.white)
+//                            .contextMenu {
+//                                Button {
+////                                    NavigationLink(destination: TestPageView())
+//                                    editItem = true
+//                                    print("in edit, editItem = \(editItem)")
+////                                    selectedItem = item
+//                                } label: {
+//                                    Label("Редактировать", systemImage: "square.and.pencil")
+//                                }
+//                                Button {
+//                                    viewModel.shareItem(item: item)
+//                                } label: {
+//                                    Label("Поделиться", systemImage: "square.and.arrow.up")
+//                                }
+//                                Button(role: .destructive) {
+//                                    viewModel.deleteItem(item: item)
+//                                } label: {
+//                                    Label("Удалить", systemImage: "trash")
+//                                }
+//                            }
+//                            Divider()
+//                    }
+//                }
+//            }
+//
+//        }
+//        .padding(.horizontal, 20)
+//        .task {
+//            await viewModel.loadTableData()
+//        }
+//        .overlay {
+//            if viewModel.isLoading {
+//                ProgressView()
+//            }
+//        }
+//        ZStack {
+//            Text("\(viewModel.listData.total) задач")
+//                .font(.system(size: 11, weight: .regular))
+//                .foregroundColor(.appWhite)
+//                .frame(height: 13)
+//                .padding(.vertical, 20.5)
+//            HStack {
+//                Spacer()
+//                Button(action: {
+//                    viewModel.addItem()
+//                }) {
+//                    Image(systemName: "square.and.pencil")
+//                        .frame(height: 28)
+//                        .foregroundStyle(.appYellow)
+//                        .font(.system(size: 22, weight: .regular))
+//                        .padding(.trailing, 22)
+//                }
+//            }
+//        }
+//        .frame(maxWidth: .infinity, maxHeight: 50)
+//        .background(.appGray)
+//    }
+//}
 
+
+//if let selectedItem = selectedItem {
+    //            ToDoActionView(toDoItem: Binding(
+    //                get: { selectedItem },
+    //                set: { newValue in
+    //                    viewModel.editItem(item: newValue)
+    //                }
+    //            ))
+    //            .frame(width: 300)
+    //            .transition(.move(edge: .trailing))
+    //        }
+    //            .animation(.default, value: selectedItem)
 
 //#Preview {
 //    MainView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)

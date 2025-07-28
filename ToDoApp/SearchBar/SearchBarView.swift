@@ -40,11 +40,9 @@ struct SearchBarView: View {
 }
 
 #Preview {
-    @State var text: String = ""
-    SearchBarView(text: $text)
+    SearchBarView(text: .constant(""))
 }
 
 #Preview {
-    @State var text: String = "No voice search"
-    SearchBarView(text: $text)
+    SearchBarView(text: .constant("No voice search"))
 }

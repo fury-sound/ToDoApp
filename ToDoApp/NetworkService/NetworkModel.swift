@@ -21,7 +21,7 @@ struct NetworkTodosModel: Codable {
     }
 }
 
-struct ToDoItem: Identifiable, Codable { //, Hashable {
+struct ToDoItem: Identifiable, Codable, Equatable, Hashable {
     var id: Int
     var todo: String
     var completed: Bool

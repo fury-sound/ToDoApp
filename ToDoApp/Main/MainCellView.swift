@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct MainCellView: View {
-    @State var toDoItem: ToDoItem
+//    @Binding var toDoItem: ToDoItem
+//    @Binding var toDoEntity: ToDoEntity
+    @State var toDoEntity: ToDoEntity
+//    @StateObject private var viewModel: MainViewModel
 
     var body: some View {
 //        HStack(alignment: .top, spacing: 12) {
@@ -33,18 +36,18 @@ struct MainCellView: View {
 
             HStack(alignment: .top) {
                 HStack {
-                    Image(systemName: toDoItem.completed ? "checkmark.circle" : "circle")
-                        .foregroundStyle(toDoItem.completed ? .appYellow : .gray)
+                    Image(systemName: toDoEntity.completed ? "checkmark.circle" : "circle")
+                        .foregroundStyle(toDoEntity.completed ? .appYellow : .gray)
                         .font(.system(size: 24, weight: .regular))
                 }
             VStack(alignment: .leading, spacing: 6) {
-                Text("ToDo #\(toDoItem.id)")
+                Text(toDoEntity.title ?? "No name")
                     .font(.system(size: 16, weight: .medium))
                     .frame(height: 22, alignment: .center)
-                    .foregroundColor(toDoItem.completed ? .appCompleted : .primary)
+                    .foregroundColor(toDoEntity.completed ? .appCompleted : .primary)
                     .overlay(
                         Group {
-                            if toDoItem.completed {
+                            if toDoEntity.completed {
                                 Rectangle()
                                     .frame(height: 1)
                                     .foregroundColor(.appCompleted)
@@ -53,11 +56,12 @@ struct MainCellView: View {
                         }
                     )
 //                Text("Every day at 10:00")
-                Text(toDoItem.todo)
+                Text(toDoEntity.todo ?? "No todo")
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(toDoItem.completed ? .appCompleted : .primary)
+                    .foregroundColor(toDoEntity.completed ? .appCompleted : .primary)
                     .lineLimit(2)
                 Text(Date.now, format: .dateTime)
+                Text(toDoEntity.date ?? "No date")
                     .font(.system(size: 16, weight: .regular))
                     .foregroundColor(.appCompleted)
             }
