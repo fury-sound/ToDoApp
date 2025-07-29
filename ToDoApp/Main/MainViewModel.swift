@@ -15,7 +15,7 @@ final class MainViewModel: NSObject, ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: Error?
     @Published var shareItems: [Any] = []
-    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
+    @AppStorage("hasLaunchedBefore") internal var hasLaunchedBefore: Bool = false
     private let networkService: NetworkServiceProtocol
     private let fetchedResultsController: NSFetchedResultsController<ToDoEntity>
     private let context: NSManagedObjectContext
@@ -50,6 +50,14 @@ final class MainViewModel: NSObject, ObservableObject {
         performFetch()
     }
 
+    private func performFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+            items = fetchedResultsController.fetchedObjects ?? []
+        } catch {
+            print("Failed to fetch items: \(error)")
+        }
+    }
 
     func saveTodoItemToCoreData(_ todoItems: [ToDoItem], context: NSManagedObjectContext) {
         self.isLoading = true
@@ -75,21 +83,16 @@ final class MainViewModel: NSObject, ObservableObject {
     }
 
     func loadTableData() async {
+        self.isLoading = true
+        defer {
+            self.isLoading = false
+        }
             do {
                 listData = try await networkService.fetchRequest()
             } catch {
                 self.error = error
                 print("Network error: \(String(describing: self.error?.localizedDescription))")
             }
-    }
-
-    private func performFetch() {
-        do {
-            try fetchedResultsController.performFetch()
-            items = fetchedResultsController.fetchedObjects ?? []
-        } catch {
-            print("Failed to fetch items: \(error)")
-        }
     }
 
     func saveToDoEntity() {
@@ -111,7 +114,6 @@ final class MainViewModel: NSObject, ObservableObject {
         saveToDoEntity()
     }
 
-
     func addItem(title: String, todo: String, date: String) {
         withAnimation {
             let newToDoEntity = ToDoEntity(context: context)
@@ -127,7 +129,6 @@ final class MainViewModel: NSObject, ObservableObject {
             saveToDoEntity()
         }
     }
-
 
     func shareItem(item: ToDoEntity) {
         shareItems = [
@@ -166,8 +167,6 @@ final class MainViewModel: NSObject, ObservableObject {
         formatter.locale = Locale(identifier: "ru_RU")
         return formatter.string(from: date)
     }
-
-
 }
 
 extension MainViewModel: NSFetchedResultsControllerDelegate {

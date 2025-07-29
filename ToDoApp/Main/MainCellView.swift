@@ -9,15 +9,12 @@ import SwiftUI
 
 struct MainCellView: View {
     let toDoItem: ToDoEntity
-//    let isSelected: Bool
     let isPressed: Bool
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
                 .fill(isPressed ? Color.appGray : Color.appBlack)
-//                .fill(.black)
-
             HStack(alignment: .top) {
                 HStack {
                     Image(systemName: toDoItem.completed ? "checkmark.circle" : "circle")
@@ -52,13 +49,8 @@ struct MainCellView: View {
             .padding(6)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .frame(maxWidth: .infinity) //, alignment: .topLeading)
+        .frame(maxWidth: .infinity)
         .padding(.vertical, 2)
-//        .colorScheme(.dark)
-        //        .background(Color.appBlack)
-//        .background(isSelected ? Color.appGray : Color.appBlack)
-        //        .background(isSelected ? Color.red : Color.appBlack)
-//        .cornerRadius(8)
     }
 }
 

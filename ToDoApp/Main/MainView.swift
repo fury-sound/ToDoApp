@@ -10,8 +10,8 @@ import CoreData
 
 struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var viewModel: MainViewModel
-    @State private var searchQuery = ""
+    @StateObject internal var viewModel: MainViewModel
+    @State internal var searchQuery = ""
     @State private var selectedItem: ToDoEntity?
     @State private var pressedItem: ToDoEntity?
     @State private var editItem: Bool = false
@@ -20,22 +20,26 @@ struct MainView: View {
     @State private var firstLaunch: Bool = true
 
     var searchedItems: [ToDoEntity] {
-        print("viewModel.items.count", viewModel.items.count)
+        //        print("viewModel.items.count", viewModel.items.count)
         if searchQuery.isEmpty {
             return viewModel.items
-        } else {
-            return viewModel.items.filter { item in
-                (item.todo ?? "").localizedCaseInsensitiveContains(searchQuery) ||
-                (item.title ?? "").localizedCaseInsensitiveContains(searchQuery) ||
-                (item.date ?? "").localizedCaseInsensitiveContains(searchQuery)
-            }
         }
-//        return viewModel.items
+        return viewModel.items.filter { item in
+            (item.todo ?? "").localizedCaseInsensitiveContains(searchQuery) ||
+            (item.title ?? "").localizedCaseInsensitiveContains(searchQuery) ||
+            (item.date ?? "").localizedCaseInsensitiveContains(searchQuery)
+        }
     }
+
 
     init() {
         let context = PersistenceController.shared.container.viewContext
         _viewModel = StateObject(wrappedValue: MainViewModel(context: context))
+    }
+
+    init(context: NSManagedObjectContext, viewModel: MainViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _searchQuery = State(initialValue: "")
     }
 
     var body: some View {
@@ -124,12 +128,6 @@ struct MainView: View {
                 }
                 .padding(.horizontal, 20)
                 .edgesIgnoringSafeArea(.bottom)
-//                .overlay {
-//                    if viewModel.isLoading {
-//                        ProgressView()
-//                    }
-//                }
-                //                    .background(.appBlack)
                 ZStack {
                     let taskCount = viewModel.items.count
                     let taskWord = viewModel.taskWordCount(for: taskCount)

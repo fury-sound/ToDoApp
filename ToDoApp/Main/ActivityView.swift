@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct ActivityView: UIViewControllerRepresentable {
     var activityItems: [Any]
     var applicationActivities: [UIActivity]? = nil

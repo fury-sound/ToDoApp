@@ -7,11 +7,6 @@
 
 import Foundation
 
-protocol NetworkServiceProtocol {
-    func fetchRequest() async throws -> NetworkTodosModel
-//    func fetchRequest() async throws -> [ToDoModel]
-}
-
 final class NetworkService: NetworkServiceProtocol {
     static var shared = NetworkService()
 
