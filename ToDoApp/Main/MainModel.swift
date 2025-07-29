@@ -13,11 +13,4 @@ struct MainModel: Identifiable, Codable, Hashable {
     var todo: String
     var completed: Bool
     var date: String
-
-//    enum CodingKeys: String, CodingKey {
-//        case id
-//        case title
-//        case price
-//        case imageUrl = "image"
-//    }
 }

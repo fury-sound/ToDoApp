@@ -24,7 +24,6 @@ struct ToDoActionView: View {
                 CustomTextEditor(text: $localTitle, fontSize: 34, isBold: true)
                     .frame(maxHeight: 41)
                     .cornerRadius(8)
-//                Text(item.date ?? "No date")
                 Text(localDate)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.appWhite)
@@ -51,7 +50,6 @@ struct ToDoActionView: View {
                         .transition(.opacity)
                         .colorScheme(.dark)
                         Button("Готово") {
-//                            localDate = viewModel.dateFormatter(date: selectedDate)
                             showDatePicker = false
                         }
                     }

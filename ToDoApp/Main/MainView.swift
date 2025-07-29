@@ -10,13 +10,28 @@ import CoreData
 
 struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var viewModel: MainViewModel //<PersistenceController>
+    @StateObject private var viewModel: MainViewModel
     @State private var searchQuery = ""
     @State private var selectedItem: ToDoEntity?
     @State private var pressedItem: ToDoEntity?
     @State private var editItem: Bool = false
     @State private var createItem: Bool = false
     @State private var showShare: Bool = false
+    @State private var firstLaunch: Bool = true
+
+    var searchedItems: [ToDoEntity] {
+        print("viewModel.items.count", viewModel.items.count)
+        if searchQuery.isEmpty {
+            return viewModel.items
+        } else {
+            return viewModel.items.filter { item in
+                (item.todo ?? "").localizedCaseInsensitiveContains(searchQuery) ||
+                (item.title ?? "").localizedCaseInsensitiveContains(searchQuery) ||
+                (item.date ?? "").localizedCaseInsensitiveContains(searchQuery)
+            }
+        }
+//        return viewModel.items
+    }
 
     init() {
         let context = PersistenceController.shared.container.viewContext
@@ -29,7 +44,6 @@ struct MainView: View {
                 VStack(spacing: 0) {
                     Text("Задачи")
                         .font(.system(size: 34, weight: .bold))
-                    //                            .foregroundStyle(.appWhite)
                         .padding(.bottom, 10)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     SearchBarView(text: $searchQuery)
@@ -37,50 +51,64 @@ struct MainView: View {
                         .padding(.bottom, 16)
                     ScrollView(.vertical, showsIndicators: false) {
                         LazyVStack {
-                            ForEach(viewModel.items, id: \.id) { item in
-                                Button {
-                                    viewModel.toggleItem(item: item)
-                                } label: {
-                                    MainCellView(
-                                        toDoItem: item,
-                                        isPressed: pressedItem == item
-                                    )
-                                }
-                                .frame(maxWidth: .infinity)
-                                .buttonStyle(PlainButtonStyle())
-                                .contentShape(Rectangle())
-                                .contextMenu {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .padding(.top, 50)
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .appYellow))
+                                    .scaleEffect(2.0)
+
+                            } else if searchedItems.isEmpty {
+                                Text("Ничего не найдено")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.appWhite)
+                                    .padding(.top, 50)
+                                    .frame(maxWidth: .infinity)
+                            } else {
+                                ForEach(searchedItems, id: \.id) { item in
                                     Button {
-                                        editItem = true
-                                        selectedItem = item
+                                        viewModel.toggleItem(item: item)
                                     } label: {
-                                        Label("Редактировать", systemImage: "square.and.pencil")
+                                        MainCellView(
+                                            toDoItem: item,
+                                            isPressed: pressedItem == item
+                                        )
                                     }
-                                    Button {
-                                        viewModel.shareItem(item: item)
-                                        showShare = true
-                                    } label: {
-                                        Label("Поделиться", systemImage: "square.and.arrow.up")
+                                    .frame(maxWidth: .infinity)
+                                    .buttonStyle(PlainButtonStyle())
+                                    .contentShape(Rectangle())
+                                    .contextMenu {
+                                        Button {
+                                            editItem = true
+                                            selectedItem = item
+                                        } label: {
+                                            Label("Редактировать", systemImage: "square.and.pencil")
+                                        }
+                                        Button {
+                                            viewModel.shareItem(item: item)
+                                            showShare = true
+                                        } label: {
+                                            Label("Поделиться", systemImage: "square.and.arrow.up")
+                                        }
+                                        Button(role: .destructive) {
+                                            viewModel.deleteItem(item: item)
+                                        } label: {
+                                            Label("Удалить", systemImage: "trash")
+                                        }
                                     }
-                                    Button(role: .destructive) {
-                                        viewModel.deleteItem(item: item)
-                                    } label: {
-                                        Label("Удалить", systemImage: "trash")
-                                    }
-                                }
-                                .simultaneousGesture(
-                                    LongPressGesture(minimumDuration: 0.3)
-                                        .onEnded { _ in
-                                            pressedItem = item
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                if pressedItem?.id == item.id {
-                                                    pressedItem = nil
+                                    .simultaneousGesture(
+                                        LongPressGesture(minimumDuration: 0.3)
+                                            .onEnded { _ in
+                                                pressedItem = item
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                    if pressedItem?.id == item.id {
+                                                        pressedItem = nil
+                                                    }
                                                 }
                                             }
-                                        }
-                                )
-                                Divider()
-                                    .background(.white)
+                                    )
+                                    Divider()
+                                        .background(.white)
+                                }
                             }
                         }
                         NavigationLink(
@@ -96,6 +124,11 @@ struct MainView: View {
                 }
                 .padding(.horizontal, 20)
                 .edgesIgnoringSafeArea(.bottom)
+//                .overlay {
+//                    if viewModel.isLoading {
+//                        ProgressView()
+//                    }
+//                }
                 //                    .background(.appBlack)
                 ZStack {
                     let taskCount = viewModel.items.count

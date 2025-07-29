@@ -22,7 +22,6 @@ struct ToDoCreateView: View {
             CustomTextEditor(text: $localTitle, fontSize: 34, isBold: true)
                 .frame(maxHeight: 41)
                 .cornerRadius(8)
-//            Text(viewModel.dateFormatter(date: selectedDate))
             Text(localDate)
                 .font(.system(size: 12, weight: .regular))
                 .foregroundColor(.appWhite)
@@ -49,7 +48,6 @@ struct ToDoCreateView: View {
                     .transition(.opacity)
                     .colorScheme(.dark)
                     Button("Готово") {
-//                        text = viewModel.formatDate(selectedDate)
                         showDatePicker = false
                     }
                 }
@@ -70,7 +68,6 @@ struct ToDoCreateView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
                     print("New text: \(localTodo)")
-//                    viewModel.saveToDoEntity()
                     viewModel.addItem(title: localTitle, todo: localTodo, date: localDate)
                     createItem = false
                     dismiss()
