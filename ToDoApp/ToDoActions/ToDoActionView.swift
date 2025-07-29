@@ -8,48 +8,78 @@
 import SwiftUI
 
 struct ToDoActionView: View {
-//    @Binding var toDoItem: ToDoItem?
-    @Binding var toDoEntity: ToDoEntity?
+    @Binding var selectedItem: ToDoEntity?
+    @Binding var editItem: Bool
+    @StateObject var viewModel: MainViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var localTodo: String = ""
+    @State private var localTitle: String = ""
+    @State private var localDate: String = ""
+    @State private var showDatePicker: Bool = false
+    @State private var selectedDate: Date = Date()
 
     var body: some View {
-        if let item = toDoEntity {
-//            let toDoText = Binding(
-//                get: { item.todo },
-//                set: { newValue in
-//                    toDoItem?.todo = newValue
-//                }
-//            )
+        if let item = selectedItem {
             VStack(alignment: .leading) {
-//                Text("ToDo \(item.id)")
-                Text(item.title ?? "No title")
-                    .font(.system(size: 34, weight: .bold))
-                    .frame(height: 41)
-//                Text("\(item.userId)")
-                Text(item.date ?? "No date")
+                CustomTextEditor(text: $localTitle, fontSize: 34, isBold: true)
+                    .frame(maxHeight: 41)
+                    .cornerRadius(8)
+//                Text(item.date ?? "No date")
+                Text(localDate)
                     .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.appCompleted)
+                    .foregroundColor(.appWhite)
                     .frame(height: 16)
                     .padding(.bottom, 16)
-//                Text("\(item.todo)")
-                TextEditor(text: $localTodo)
-                    .font(.system(size: 16, weight: .regular))
+                    .onTapGesture {
+                        withAnimation {
+                            showDatePicker.toggle()
+                        }
+                    }
+                CustomTextEditor(text: $localTodo, fontSize: 16, isBold: false)
                     .frame(minHeight: 100)
-                    .multilineTextAlignment(.leading)
+                    .cornerRadius(8)
+                if showDatePicker {
+                    VStack {
+                        DatePicker("Выберите дату",
+                                   selection: $selectedDate,
+                                   displayedComponents: .date
+                        )
+                        .datePickerStyle(.graphical)
+                        .padding()
+                        .background(Color.appBlack)
+                        .foregroundStyle(.appWhite)
+                        .transition(.opacity)
+                        .colorScheme(.dark)
+                        Button("Готово") {
+//                            localDate = viewModel.dateFormatter(date: selectedDate)
+                            showDatePicker = false
+                        }
+                    }
+                }
                 Spacer()
             }
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.appBlack)
             .onAppear {
                 self.localTodo = item.todo ?? "No ToDo"
+                self.localTitle = item.title ?? "No title"
+                self.localDate = item.date ?? "No title"
+            }
+            .onChange(of: selectedDate) { newDate in
+                localDate = viewModel.dateFormatter(date: newDate)
             }
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         print("New text: \(localTodo)")
-                        toDoEntity?.todo = localTodo
+                        selectedItem?.todo = localTodo
+                        selectedItem?.title = localTitle
+                        selectedItem?.date = localDate
+                        viewModel.saveToDoEntity()
+                        editItem = false
+                        selectedItem = nil
                         dismiss()
                     }) {
                         HStack {
@@ -67,7 +97,35 @@ struct ToDoActionView: View {
 //#Preview {
 //    var title = "Заняться спортом"
 //    var text = "Составить список необходимых продуктов для ужина. Не забыть проверить, что уже есть в холодильнике."
-//    var toDoEntity = ToDoEntity(entity: .init, insertInto: nil)
+//    // 1. Создаём временный контекст Core Data для превью
+//    let context = PersistenceController.preview.container.viewContext
+//
+//    // 2. Создаём тестовый объект
+//    let toDoEntity = ToDoEntity(context: context)
+//    toDoEntity.id = 1
+//    toDoEntity.title = "Test Task"
+//    toDoEntity.todo = "Test Description"
+//    toDoEntity.completed = false
+//    toDoEntity.date = "2023-01-01"
+//
+//    // 3. Подготавливаем State-переменные
+//    @State var editItem: Bool = true
+//    @State var selectedItem: ToDoEntity? = toDoEntity
+//
+//    // 4. Создаём ViewModel (если требуется)
+//    let viewModel = MainViewModel()
+//
+//    // 5. Возвращаем вью с правильными параметрами
+//    return ToDoActionView(
+//        selectedItem: $selectedItem, // Передаём Binding
+//        editItem: $editItem,
+//        viewModel: viewModel
+//    )
+//    .environment(\.managedObjectContext, context)
+//    @State var editItem: Bool = true
+//    var viewModel: MainViewModel
+//    var toDoEntity = ToDoEntity()
+//    ToDoActionView(selectedItem: toDoEntity, editItem: $editItem, viewModel: viewModel)
 //    ToDoActionView(toDoEntity: toDoEntity)
-////    ToDoActionView(toDoEntity: .constant(.init(id: 11, todo: text, completed: false, userId: 155)))
+//    ToDoActionView(toDoEntity: .constant(.init(id: 11, todo: text, completed: false, userId: 155)))
 //}
